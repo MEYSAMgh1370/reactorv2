@@ -5,6 +5,7 @@ import com.example.reactorv2.model.StudentDTO;
 import com.example.reactorv2.repositories.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,28 +21,53 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Mono<StudentDTO> findStudentById(Long studentId) {
+    public Mono<StudentDTO> findStudentById (Long studentId) {
         return studentRepository.findById(studentId)
                 .map(studentMapper::toDto);
     }
 
     @Override
-    public Mono<StudentDTO> saveNewStudent(StudentDTO studentDTO) {
-        return studentRepository.save(studentMapper.fromDto(studentDTO))
+    public Mono<StudentDTO> saveNewStudent (Mono<StudentDTO> studentDTO) {
+        return studentDTO.map(studentMapper::fromDto)
+                .flatMap(studentRepository::save)
                 .map(studentMapper::toDto);
     }
 
     @Override
-    public Mono<StudentDTO> UpdateStudent(Long studentId, StudentDTO studentDTO) {
+    public Mono<StudentDTO> updateStudent(Long studentId, Mono<StudentDTO> studentDTO) {
+        return studentDTO.map(studentMapper::fromDto)
+                .flatMap(student -> studentRepository.findById(studentId)
+                    .map(foundStudent -> {
+                        foundStudent.setId(student.getId());
+                        foundStudent.setName(student.getName());
+                        foundStudent.setFamilyName(student.getFamilyName());
+                        foundStudent.setBirthDay(student.getBirthDay());
+                        return foundStudent;
+                    }).flatMap(studentRepository::save)
+                .map(studentMapper::toDto));
+    }
+
+    @Override
+    public Mono<StudentDTO> patchStudent(Long studentId, StudentDTO studentDTO) {
         return studentRepository.findById(studentId)
-                .map(foundStudent -> {
-                    foundStudent.setName(studentDTO.getName());
-                    foundStudent.setFamilyName(studentDTO.getFamilyName());
-                    foundStudent.setBirthDay(studentDTO.getBirthDay());
-                    return foundStudent;
+                .map(foundBeer -> {
+                    if(StringUtils.hasText(studentDTO.getName())){
+                        foundBeer.setName(studentDTO.getName());
+                    }
+
+                    if(StringUtils.hasText(studentDTO.getFamilyName())){
+                        foundBeer.setFamilyName(studentDTO.getFamilyName());
+                    }
+
+                    if(StringUtils.hasText(studentDTO.getFatherName())){
+                        foundBeer.setFatherName(studentDTO.getFatherName());
+                    }
+
+                    return foundBeer;
                 }).flatMap(studentRepository::save)
                 .map(studentMapper::toDto);
     }
+
 
     @Override
     public Mono<Void> deleteStudentById(Long studentId) {

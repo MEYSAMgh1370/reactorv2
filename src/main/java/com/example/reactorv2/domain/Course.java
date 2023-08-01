@@ -30,9 +30,9 @@ public class Course {
     private LocalDateTime lastModifiedDate;
 
     @Transient
-    private Set<Long> studentsId = new HashSet<>();
+    private Set<Long> studentIds = new HashSet<>();
 
-    @Transient
+/*    @Transient
     private List<Student> students = new ArrayList<>();
 
     public void addStudent(final Student student) {
@@ -40,5 +40,5 @@ public class Course {
         if (student.getId() != null) {
             studentsId.add(student.getId());
         }
-    }
+    }*/
 }

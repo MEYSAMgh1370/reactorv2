@@ -10,9 +10,12 @@ public interface StudentService {
 
     Mono<StudentDTO> findStudentById(Long studentId);
 
-    Mono<StudentDTO> saveNewStudent(StudentDTO studentDTO);
+    Mono<StudentDTO> saveNewStudent(Mono<StudentDTO> studentDTO);
 
-    Mono<StudentDTO> UpdateStudent(Long studentId, StudentDTO studentDTO);
+
+    Mono<StudentDTO> updateStudent(Long studentId, Mono<StudentDTO> studentDTO);
+
+    Mono<StudentDTO> patchStudent(Long studentId, StudentDTO studentDTO);
 
     Mono<Void> deleteStudentById(Long studentId);
 }

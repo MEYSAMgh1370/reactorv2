@@ -37,14 +37,5 @@ public class Student {
     @LastModifiedDate
     private LocalDateTime lastModifiedDate;
 
-    @Transient
-    @ToString.Exclude
-    private List<Course> courses;
 
-    public void addCourse(final Course course) {
-        if(courses == null) {
-            courses = new ArrayList<>();
-        }
-        courses.add(course);
-    }
 }
