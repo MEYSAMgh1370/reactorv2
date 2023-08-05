@@ -32,13 +32,12 @@ public class StudentServiceImpl implements StudentService {
                 .flatMap(studentRepository::save)
                 .map(studentMapper::toDto);
     }
-
+// todo id ro az studentdto begire
     @Override
-    public Mono<StudentDTO> updateStudent(Long studentId, Mono<StudentDTO> studentDTO) {
+    public Mono<StudentDTO> updateStudent( Mono<StudentDTO> studentDTO) {
         return studentDTO.map(studentMapper::fromDto)
-                .flatMap(student -> studentRepository.findById(studentId)
+                .flatMap(student -> studentRepository.findById(student.getId())
                     .map(foundStudent -> {
-                        foundStudent.setId(student.getId());
                         foundStudent.setName(student.getName());
                         foundStudent.setFamilyName(student.getFamilyName());
                         foundStudent.setBirthDay(student.getBirthDay());
@@ -48,8 +47,8 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Mono<StudentDTO> patchStudent(Long studentId, StudentDTO studentDTO) {
-        return studentRepository.findById(studentId)
+    public Mono<StudentDTO> patchStudent(StudentDTO studentDTO) {
+        return studentRepository.findById(studentDTO.getId())
                 .map(foundBeer -> {
                     if(StringUtils.hasText(studentDTO.getName())){
                         foundBeer.setName(studentDTO.getName());

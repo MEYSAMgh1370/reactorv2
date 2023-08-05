@@ -3,6 +3,7 @@ package com.example.reactorv2.mapper;
 import com.example.reactorv2.domain.Course;
 import com.example.reactorv2.model.CourseDTO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 
 @Mapper(componentModel="spring", uses = {StudentMapper.class})

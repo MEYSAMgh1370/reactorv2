@@ -22,14 +22,14 @@ public class CourseDTO {
 
     private String name;
 
+    private Integer capacity;
+
     @CreatedDate
     private LocalDateTime createdDate;
 
     @LastModifiedDate
     private LocalDateTime lastModifiedDate;
 
-    private Set<Long> studentsId;
-
-    private List<Student> students;
+    private List<StudentDTO> students;
 
 }

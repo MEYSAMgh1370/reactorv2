@@ -1,7 +1,6 @@
 package com.example.reactorv2.config;
 
 import io.r2dbc.spi.ConnectionFactory;
-import lombok.Builder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

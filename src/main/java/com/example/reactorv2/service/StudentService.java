@@ -7,15 +7,9 @@ import reactor.core.publisher.Mono;
 public interface StudentService {
 
     Flux<StudentDTO> listStudent();
-
     Mono<StudentDTO> findStudentById(Long studentId);
-
     Mono<StudentDTO> saveNewStudent(Mono<StudentDTO> studentDTO);
-
-
-    Mono<StudentDTO> updateStudent(Long studentId, Mono<StudentDTO> studentDTO);
-
-    Mono<StudentDTO> patchStudent(Long studentId, StudentDTO studentDTO);
-
+    Mono<StudentDTO> updateStudent( Mono<StudentDTO> studentDTO);
+    Mono<StudentDTO> patchStudent(StudentDTO studentDTO);
     Mono<Void> deleteStudentById(Long studentId);
 }

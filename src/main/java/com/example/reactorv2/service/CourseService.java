@@ -16,5 +16,9 @@ public interface CourseService {
     Flux<CourseDTO> findAllCourse();
     Mono<Void> deleteById(Long id);
 
-    Mono<CourseDTO> updateById(Long courseId, Mono<CourseDTO> courseDTO);
+    Mono<CourseDTO> update(Mono<CourseDTO> courseDTO);
+
+    Mono<CourseDTO> patchCourse(CourseDTO courseDTO);
+
+    Mono<CourseDTO> addStudentToCourse(Long courseId, Long studentId);
 }

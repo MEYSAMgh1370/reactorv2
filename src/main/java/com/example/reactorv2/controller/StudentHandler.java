@@ -54,7 +54,7 @@ public class StudentHandler {
         return request.bodyToMono(StudentDTO.class)
                 .doOnNext(this::validate)
                 .flatMap(studentDTO -> studentService
-                        .updateStudent(Long.valueOf(request.pathVariable("studentId")),Mono.just(studentDTO)))
+                        .updateStudent(Mono.just(studentDTO)))
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
                 .flatMap(savedDto -> ServerResponse.noContent().build());
     }
@@ -69,9 +69,10 @@ public class StudentHandler {
     public Mono<ServerResponse> patchStudentById(ServerRequest request) {
         return request.bodyToMono(StudentDTO.class)
                 .doOnNext(this::validate)
-                .flatMap(studentDTO -> studentService
-                        .patchStudent(Long.valueOf(request.pathVariable("beerId")),studentDTO))
+                .flatMap(studentService::patchStudent)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
                 .flatMap(savedDto -> ServerResponse.noContent().build());
     }
+
+
 }

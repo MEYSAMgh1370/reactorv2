@@ -7,9 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -23,14 +21,14 @@ public class Course {
 
     private @NonNull String name;
 
+    private @NonNull Integer capacity;
+
     @CreatedDate
     private LocalDateTime createdDate;
 
     @LastModifiedDate
     private LocalDateTime lastModifiedDate;
 
-    @Transient
-    private Set<Long> studentIds = new HashSet<>();
 
 /*    @Transient
     private List<Student> students = new ArrayList<>();

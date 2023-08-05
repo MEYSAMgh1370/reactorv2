@@ -2,12 +2,14 @@ package com.example.reactorv2;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.reactive.config.EnableWebFlux;
 
 @SpringBootApplication
-public class Reactorv2Application {
+@EnableWebFlux
+ public class ReactorV2Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(Reactorv2Application.class, args);
+        SpringApplication.run(ReactorV2Application.class, args);
     }
 
 }
