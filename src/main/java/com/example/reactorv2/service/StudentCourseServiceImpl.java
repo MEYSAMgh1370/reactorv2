@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class StudentCourseServiceImpl implements StudentCourseService {
@@ -44,6 +46,14 @@ public class StudentCourseServiceImpl implements StudentCourseService {
 
         return studentCourseRepository.save(StudentCourse.builder().courseId(courseId)
                 .studentId(studentId).build());
+
+    }
+
+    @Override
+    public Flux<StudentCourse> saveByIds(List<StudentCourse> studentCourses) {
+
+        return studentCourseRepository.saveAll(studentCourses);
+
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.example.reactorv2.service;
 
+import com.example.reactorv2.domain.Course;
+import com.example.reactorv2.domain.StudentCourse;
 import com.example.reactorv2.mapper.CourseMapper;
 import com.example.reactorv2.mapper.StudentMapper;
 import com.example.reactorv2.model.CourseDTO;
@@ -12,6 +14,7 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,18 +31,23 @@ public class CourseServiceImpl implements CourseService{
 
 
     @Override
-    public Mono<CourseDTO> save(Mono<CourseDTO> courseDTO) {
-        courseDTO.map(coursedto -> {
-            if(coursedto.getStudents().size() < coursedto.getCapacity()) {
-                for (StudentDTO studentDTO : coursedto.getStudents()) {
-                    studentCourseService.saveByIds(coursedto.getId() ,studentDTO.getId());
-                }
-            }
-            return coursedto;
-        });
-        return courseDTO.map(courseMapper::fromDto)
-                .flatMap(courseRepository::save)
-                .map(courseMapper::toDto);
+    public Mono<CourseDTO> save(CourseDTO courseDTO) {
+
+        Course course = courseMapper.fromDto(courseDTO);
+        return courseRepository.save(course)
+                .map(courseMapper::toDto)
+                .flatMap(savedCourseDTO -> {
+                    Mono<CourseDTO> result = Mono.just(savedCourseDTO);
+                    if(courseDTO.getStudents().size() < savedCourseDTO.getCapacity()) {
+                        List<StudentCourse> studentCourses = new ArrayList<>();
+                        for (StudentDTO studentDTO : courseDTO.getStudents()) {
+                            studentCourses.add(StudentCourse.builder().courseId(courseDTO.getId())
+                                    .studentId(studentDTO.getId()).build());
+                        }
+                        return studentCourseService.saveByIds(studentCourses).collectList().then(result);
+                    }
+                    return result;
+                });
     }
 
     @Override
@@ -78,22 +86,36 @@ public class CourseServiceImpl implements CourseService{
 
     @Override
     public Mono<Void> deleteById(Long courseId){
-        studentCourseRepository.deleteAllByCourseId(courseId);
-        return courseRepository.deleteById(courseId);
+
+        return studentCourseRepository.deleteAllByCourseId(courseId)
+                .then(courseRepository.deleteById(courseId));
     }
 
+
+
     @Override
-    public Mono<CourseDTO> update(Mono<CourseDTO> courseDTO){
-        courseDTO.map(courseDTO1 -> Flux.fromIterable(courseDTO1.getStudents())
-                .map(studentDTO -> studentCourseService.saveByIds(courseDTO1.getId(),studentDTO.getId())));
-        return courseDTO
-                .flatMap(course -> courseRepository.findById(course.getId())
+    public Mono<CourseDTO> update(CourseDTO courseDTO){
+
+        return courseRepository.findById(courseDTO.getId())
                     .map(foundedCourse -> {
-                        foundedCourse.setCapacity(course.getCapacity());
-                        foundedCourse.setName(course.getName());
+                        foundedCourse.setCapacity(courseDTO.getCapacity());
+                        foundedCourse.setName(courseDTO.getName());
                         return foundedCourse;
                     }).flatMap(courseRepository::save)
-                        .map(courseMapper::toDto));
+                        .map(courseMapper::toDto)
+                .flatMap(updatedCourseDTO -> {
+                    Mono<CourseDTO> result = Mono.just(updatedCourseDTO);
+                    if(courseDTO.getStudents().size() < updatedCourseDTO.getCapacity()) {
+                        List<StudentCourse> studentCourses = new ArrayList<>();
+                        for (StudentDTO studentDTO : courseDTO.getStudents()) {
+                            studentCourses.add(StudentCourse.builder().courseId(courseDTO.getId())
+                                    .studentId(studentDTO.getId()).build());
+                        }
+                        return studentCourseRepository.deleteAllByCourseId(updatedCourseDTO.getId())
+                                .then(studentCourseService.saveByIds(studentCourses).collectList()).then(result);
+                    }
+                    return result;
+                });
     }
 
     @Override
@@ -115,14 +137,23 @@ public class CourseServiceImpl implements CourseService{
 
     @Override
     public Mono<CourseDTO> addStudentToCourse(Long courseId, Long studentId) {
-        studentCourseService.saveByIds(courseId,studentId);
+
         return courseRepository.findById(courseId)
-                .map(courseMapper::toDto)
-                .map(foundedCourse ->{
-                    if (foundedCourse.getStudents().size() < foundedCourse.getCapacity()) {
-                    foundedCourse.getStudents().add(studentService.findStudentById(studentId).block());}
-                    return foundedCourse;
-                });
+                .flatMap(foundedCourse -> studentCourseService.findStudentByCourseID(courseId).collectList()
+                        .flatMap(foundedStudents -> {
+                            CourseDTO courseDTO = courseMapper.toDto(foundedCourse);
+                            courseDTO.setStudents(foundedStudents);
+                            if(foundedStudents.size() < foundedCourse.getCapacity())
+                            {
+                                return studentCourseService.saveByIds(courseId,studentId)
+                                        .flatMap( savedStudentCourse -> studentService.findStudentById(studentId)
+                                                .flatMap(foundedStudent -> {
+                                                    courseDTO.getStudents().add(foundedStudent);
+                                                    return Mono.just(courseDTO);
+                                                }));
+                            }
+                            return Mono.just(courseDTO);
+                        }));
 
     }
 }

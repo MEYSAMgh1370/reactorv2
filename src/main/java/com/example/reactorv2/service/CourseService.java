@@ -8,7 +8,9 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public interface CourseService {
-    Mono<CourseDTO> save(Mono<CourseDTO> course);
+    Mono<CourseDTO> save(CourseDTO courseDTO);
+
+
     Mono<CourseDTO> findById(Long id);
 
     Flux<CourseDTO> findByIds(List<Long> courseIds);
@@ -16,7 +18,9 @@ public interface CourseService {
     Flux<CourseDTO> findAllCourse();
     Mono<Void> deleteById(Long id);
 
-    Mono<CourseDTO> update(Mono<CourseDTO> courseDTO);
+
+
+    Mono<CourseDTO> update(CourseDTO courseDTO);
 
     Mono<CourseDTO> patchCourse(CourseDTO courseDTO);
 
